@@ -1,0 +1,43 @@
+.sidebar-container {
+    width: 300px;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.custom-list-item {
+  /* border-top: 1px solid #686c82; 
+  border-bottom: 1px solid #686c82;
+  border-left: none;
+  border-right: none; */
+  border: none;
+  border-radius: 0 !important;
+  transition: all ease 0.3s;
+}
+.custom-list-item:hover {
+    background-color: #2f2f33 !important;
+}
+
+.profile-tab {
+    position: fixed;
+    bottom: 0;
+    width: 300px;
+    padding: 10px;
+}
+
+.logout{
+    margin-top: 0.6rem;
+    margin-right: 0.5rem;
+    color: #f73434;
+    cursor: pointer;
+    padding: 7px 5px;
+    border-radius: 5px;
+}
+.logout:hover{
+    background-color: #202022;
+}
+.message-preview {
+    color: #a2a2aa !important;
+}
