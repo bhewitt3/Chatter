@@ -1,39 +1,82 @@
-.chat-container{
-    margin-left: 300px;
-    height: 100vh;
-    
+.chat-container {
+  margin-left: 300px;
+   /* Adjust to fit your layout */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  background-color: #969696;
 }
-.messages-container{
-    display: flex;
-    flex-direction: column-reverse;
-    padding: 15px 20px;
+
+/* Top user bar */
+.top-bar {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-left: 15px;
+  flex-shrink: 0;
+  color: white;
 }
+
+/* Scrollable message area */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 15px 20px;
+}
+
+/* Each message row */
+.message-line {
+  margin-bottom: 10px;
+}
+.my-message-line {
+  display: flex;
+  justify-content: flex-end;
+}
+.with-message-line {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Message bubbles */
 .message-container {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 10px;
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  max-width: 75%;
+  word-wrap: break-word;
 }
 .my-message-container {
-    background-color: rgb(89, 89, 194);
-    color: white;
+  background-color: rgb(89, 89, 194);
+  color: white;
 }
 .with-message-container {
-    
+  background-color: #e0e0e0;
 }
-.message-line {
-    margin-bottom: 10px;
+
+/* Fixed message form */
+.message-form-container {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: 12px 16px;
+  height: 70px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
 }
-.my-message-line{
-    display:flex;
-    justify-content: end;
+.input-form {
+    flex: 1;
 }
-.message {
-    margin: 0;
-}
-.top-bar{
-    height: 70px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.send-message {
     padding-left: 15px;
+    font-size: 30px;
+}
+/* Message text */
+.message {
+  margin: 0;
 }

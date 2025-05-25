@@ -9,6 +9,7 @@ import type { User } from "../types/user";
 import { login } from "../api/api_user";
 import type { ApiResponse } from "../types/api";
 import { useAuth } from "../context/AuthContext";
+
 const Login = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
