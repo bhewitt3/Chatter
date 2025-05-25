@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [conversationPreviews, setConversationPreviews] = useState<ConversationPreview[]>([]);
   //ID of the active conversation
   const [activeConversation, setActiveConversation] = useState<number | null>(null);
+  const [withUserId, setWithUserId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchConversations = async() => {
@@ -23,13 +24,18 @@ const Dashboard = () => {
     fetchConversations();
   }, []);
 
+  const onSelectConversation = (conversationId: number | null, withId: number | null) => {
+    setActiveConversation(conversationId);
+    setWithUserId(withId);
+  }
+  
   return (
     <div className="flex">
       <Sidebar 
         conversations={conversationPreviews}
-        onSelectConversation={(id) => setActiveConversation(id)}
+        onSelectConversation={(conversationId: number | null, withId: number | null) => onSelectConversation(conversationId, withId)}
        />
-      <ChatWindow conversationId={activeConversation}/>
+      <ChatWindow conversationId={activeConversation} withUserId={withUserId}/>
     </div>
   )
 }

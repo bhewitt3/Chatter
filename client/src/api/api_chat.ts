@@ -23,9 +23,9 @@ export const getConversations = async (): Promise<ApiResponse<ConversationPrevie
 export const getConversationMessages = async (conversationId: number): Promise<ApiResponse<Message[]>> => {
     try{
         const response = await fetch('/api/chat/messages', {
-            method: 'GET',
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(conversationId)
+            body: JSON.stringify({conversationId: conversationId})
         });
 
         const data: ApiResponse<Message[]> = await response.json();

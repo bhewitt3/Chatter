@@ -78,10 +78,10 @@ export const loginUser = async (req: Request, res: Response) => {
         };
 
         const userResponse: UserLoginResponseDTO = {
-            id: user.Id,
-            username: user.Username,
-            displayName: user.DisplayName,
-            email: user.Email,
+            Id: user.Id,
+            Username: user.Username,
+            DisplayName: user.DisplayName,
+            Email: user.Email,
             ProfileImageUrl: user.ProfileImageUrl
         };
 
@@ -139,10 +139,10 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         }
 
         const userResponse: UserLoginResponseDTO = {
-            id: user.Id,
-            username: user.Username,
-            displayName: user.DisplayName,
-            email: user.Email,
+            Id: user.Id,
+            Username: user.Username,
+            DisplayName: user.DisplayName,
+            Email: user.Email,
             ProfileImageUrl: user.ProfileImageUrl
         };
 
@@ -165,4 +165,30 @@ export const logout = async (req: Request, res: Response) => {
         type: 'success',
         message: 'Logged out successfully.'
     });
+};
+
+export const userById = async (req: Request, res: Response) => {
+    const {userId} = req.body;
+    try{
+       const user: User | null = await getUserById(userId);
+
+        if (!user){
+            res.status(404).json({
+                type: 'error',
+                message: 'User not found.'
+            });
+            return;
+        }
+        res.status(200).json({
+            type: 'success',
+            message: 'User by id.',
+            data: user
+        }); 
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            type: 'error',
+            message: err
+        });
+    }
 };

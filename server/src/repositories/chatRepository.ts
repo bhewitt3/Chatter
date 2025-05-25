@@ -38,10 +38,11 @@ export const createConversationWithInitialMessage = async (
 export const getConversationsByUser = async(userId: number): Promise<ConversationPreview[]> => {
     const query = `
         SELECT c.*,
-        m.Content AS LastMessage,
-        m.SentAt AS LastMessageAt,
-        u.DisplayName AS WithUser,
-        u.ProfileImageUrl AS WithUserAvatar
+            m.Content AS LastMessage,
+            m.SentAt AS LastMessageAt,
+            u.DisplayName AS WithUserDisplay,
+            u.Id AS WithUserId,
+            u.ProfileImageUrl AS WithUserAvatar
         FROM Conversations c
         JOIN ConversationParticipants cp ON c.Id = cp.ConversationId
         OUTER APPLY (
@@ -51,7 +52,7 @@ export const getConversationsByUser = async(userId: number): Promise<Conversatio
             ORDER BY m.SentAt DESC
         ) m
         OUTER APPLY (
-            SELECT TOP 1 u.DisplayName, u.ProfileImageUrl
+            SELECT TOP 1 u.DisplayName, u.ProfileImageUrl, u.Id
             FROM ConversationParticipants cp2
             JOIN Users u ON cp2.UserId = u.Id
             WHERE cp2.ConversationId = c.Id AND cp2.UserId != @userId

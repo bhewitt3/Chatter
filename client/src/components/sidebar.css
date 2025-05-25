@@ -8,10 +8,6 @@
 }
 
 .custom-list-item {
-  /* border-top: 1px solid #686c82; 
-  border-bottom: 1px solid #686c82;
-  border-left: none;
-  border-right: none; */
   border: none;
   border-radius: 0 !important;
   transition: all ease 0.3s;

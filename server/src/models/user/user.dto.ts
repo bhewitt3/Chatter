@@ -1,8 +1,8 @@
 export interface UserLoginResponseDTO {
-    id: number;
-    username: string;
-    displayName: string;
-    email: string;
+    Id: number;
+    Username: string;
+    DisplayName: string;
+    Email: string;
     ProfileImageUrl?: string;
 }
 

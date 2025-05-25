@@ -5,7 +5,8 @@ export interface ConversationPreview {
     CreatedBy: number,
     LastMessage: string,
     LastMessageAt: Date,
-    WithUser: string,
+    WithUserId: number,
+    WithUserDisplay: string,
     WithUserAvatar: string
 }
 

@@ -11,9 +11,9 @@ export interface SignUpCredentials {
 }
 
 export interface User {
-    id: number,
-    username: string,
-    displayName: string,
-    email: string,
-    profileImageUrl?: string
+    Id: number,
+    Username: string,
+    DisplayName: string,
+    Email: string,
+    ProfileImageUrl?: string
 }

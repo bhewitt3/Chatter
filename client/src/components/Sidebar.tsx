@@ -8,13 +8,14 @@ import "./sidebar.css";
 
 type SidebarProps = {
   conversations: ConversationPreview[];
-  onSelectConversation: (conversationId: number) => void;
+  onSelectConversation: (conversationId: number, withId: number) => void;
 }
 
 
 const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
+  console.log(user)
 
 
   const handleLogout = async() => {
@@ -36,7 +37,7 @@ const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
           <ListGroup.Item>No conversations found.</ListGroup.Item>
         )}
         {conversations.map((conv) => (
-          <ListGroup.Item key={conv.Id} action className="custom-list-item bg-secondary" onClick={() => onSelectConversation(conv.Id)}>
+          <ListGroup.Item key={conv.Id} action className="custom-list-item bg-secondary" onClick={() => onSelectConversation(conv.Id, conv.WithUserId)}>
             <div className="d-flex align-items-start gap-2">
               {/* Avatar container */}
               <div>
@@ -52,7 +53,7 @@ const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
               {/* Text content container */}
               <div className="flex-grow-1">
                 <div className="d-flex justify-content-between name-container">
-                  <p className="text-truncate text-light  mb-0 fs-5">{conv.WithUser}</p>
+                  <p className="text-truncate text-light  mb-0 fs-5">{conv.WithUserDisplay}</p>
                   <small className="text-light">
                     {shortenDistance(
                       formatDistanceToNow(new Date(conv.LastMessageAt), {
@@ -75,7 +76,7 @@ const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
       <div className="profile-tab d-flex justify-content-between bg-secondary-dark">
         <div className="d-flex align-items-center">
           <img src="src/assets/user.png" width={40} />
-          <p className="text-white m-0 ms-3">{user?.displayName}</p>
+          <p className="text-white m-0 ms-3">{user?.DisplayName}</p>
         </div> 
         <span className="material-symbols-outlined logout" onClick={handleLogout}>logout</span>
       </div>

@@ -40,3 +40,20 @@ export const signUp = async (credentials: SignUpCredentials): Promise<ApiRespons
         }
     }
 };
+
+export const userById = async(userId: number): Promise<ApiResponse<User>> => {
+    try{ 
+        const response = await fetch('/api/auth/userbyid', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({userId: userId})
+        });
+        const data: ApiResponse<User> = await response.json();
+        return data;
+    } catch (err) {
+        return {
+            type: 'error',
+            message: `An error occurred fetching user by id: ${err}`
+        }
+    }
+};

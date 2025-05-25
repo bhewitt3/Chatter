@@ -8,6 +8,6 @@ router.route('/new').post(authenticateJWT, startConversation);
 
 router.route('/all').get(authenticateJWT, conversationsByUser);
 
-router.route('/messages').get(authenticateJWT, messagesByConversationId);
+router.route('/messages').post(authenticateJWT, messagesByConversationId);
 
 export default router;
