@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Message } from '../types/chat';
-import { getConversationMessages } from '../api/api_chat';
+import { getConversationMessages, saveMessage } from '../api/api_chat';
 import type { User } from '../types/user';
 import { userById } from '../api/api_user';
 import './chatWindow.css';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
-import { Form } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
+import type { ApiResponse } from '../types/api';
+import { io, Socket } from 'socket.io-client';
 
 type ChatWindowProps = {
   conversationId: number | null;
@@ -20,7 +22,9 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
+  // Fetch messages and withUser info when conversationId changes
   useEffect(() => {
     const fetchMessages = async () => {
       if (conversationId == null) return;
@@ -36,18 +40,53 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
 
     fetchMessages();
     fetchWithUser();
-  }, [conversationId]);
+  }, [conversationId, withUserId]);
 
+  // Scroll to bottom when messages update
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = () => {
-    // handle sending message logic here
-    console.log('Send message:', newMessage);
-    setNewMessage('');
-  };
+  // Setup and manage socket connection for current conversation
+  useEffect(() => {
+    if (!conversationId) return;
 
+    const socket = io('http://localhost:5000', {
+      path: '/socket.io',
+      withCredentials: true,
+    });
+
+    socketRef.current = socket;
+    socket.on('connect', () => {
+      console.log("socket connected:", socket.id);
+      socket.emit('joinConversation', { conversationId });
+    });
+
+    socket.on('receiveMessage', (incomingMessage: Message) => {
+      setMessages((prevMessages) => [incomingMessage, ...prevMessages]);
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+      socket.disconnect();
+    };
+  }, [conversationId]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      if (conversationId && user) {
+        const response: ApiResponse<Message> = await saveMessage(conversationId, user.Id, newMessage);
+        if (response.type === 'success' && response.data) {
+          setNewMessage('');
+          socketRef.current?.emit('sendMessage', response.data);
+
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save message.');
+    }
+  };
   if (!user) {
     navigate('/login');
     return null;
@@ -63,6 +102,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
           </div>
 
           <div className="messages-container">
+            <div ref={bottomRef} />
             {messages.map((message) => (
               message.SenderId === user.Id ? (
                 <div className="message-line my-message-line" key={message.Id}>
@@ -78,22 +118,22 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
                 </div>
               )
             ))}
-            <div ref={bottomRef} />
           </div>
 
-          <div className="message-form-container bg-secondary">
-            <Form className='input-form'>
-              <Form.Group>
-                <Form.Control
-                  type="text"
-                  value={newMessage}
-                  placeholder="Enter a message..."
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  required
-                />
-              </Form.Group>
+          <div className="message-form-container bg-secondary ">
+            <Form className="input-form d-flex" onSubmit={handleSubmit}>
+              <Form.Control
+                type="text"
+                value={newMessage}
+                placeholder="Enter a message..."
+                onChange={(e) => setNewMessage(e.target.value)}
+                required
+              />
+              <Button type="submit" className="ms-2">
+                <span className="material-symbols-outlined text-light send-message">send</span>
+              </Button>
             </Form>
-            <span onClick={handleSubmit} className='material-symbols-outlined text-light send-message'>send</span>
+            
           </div>
         </>
       ) : (

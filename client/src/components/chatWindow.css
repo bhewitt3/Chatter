@@ -1,6 +1,6 @@
+/* Entire chat window */
 .chat-container {
   margin-left: 300px;
-   /* Adjust to fit your layout */
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,7 @@
   background-color: #e0e0e0;
 }
 
-/* Fixed message form */
+/* Message input */
 .message-form-container {
   position: sticky;
   bottom: 0;
@@ -72,8 +72,9 @@
 .input-form {
     flex: 1;
 }
+/* send button */
 .send-message {
-    padding-left: 15px;
+    padding:  0px 10px;
     font-size: 30px;
 }
 /* Message text */

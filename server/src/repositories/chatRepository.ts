@@ -1,4 +1,4 @@
-import {select, create} from '../db'
+import {select, create, createAndReturn} from '../db'
 import type { ConversationPreview } from '../models/conversation/conversation.types'
 import type { Message } from '../models/message/message.types';
 export const createConversationWithInitialMessage = async (
@@ -6,7 +6,7 @@ export const createConversationWithInitialMessage = async (
     recipientId: number,
     message: string
 ): Promise<boolean> => {
-    const query = `
+    const query: string = `
         DECLARE @ConversationId INT;
 
         -- Step 1: Create conversation
@@ -26,7 +26,7 @@ export const createConversationWithInitialMessage = async (
         VALUES (@ConversationId, @senderId, @message);
     `;
 
-    const rowsAffected = await create(query, {
+    const rowsAffected: number = await create(query, {
         senderId,
         recipientId,
         message
@@ -36,7 +36,7 @@ export const createConversationWithInitialMessage = async (
 };
 
 export const getConversationsByUser = async(userId: number): Promise<ConversationPreview[]> => {
-    const query = `
+    const query: string = `
         SELECT c.*,
             m.Content AS LastMessage,
             m.SentAt AS LastMessageAt,
@@ -67,7 +67,7 @@ export const getConversationsByUser = async(userId: number): Promise<Conversatio
 };
 
 export const getMessagesByConversationId = async(conversationId: number): Promise<Message[]> => {
-    const query = `
+    const query: string = `
         SELECT *
         FROM Messages
         WHERE ConversationId = @conversationId
@@ -75,4 +75,19 @@ export const getMessagesByConversationId = async(conversationId: number): Promis
     `;
     const messages: Message[] = await select<Message>(query, {conversationId});
     return messages;
+}
+
+export const createMessage = async(conversationId: number, senderId: number, content: string): Promise<Message | null> => {
+    const query: string = `
+        INSERT INTO Messages
+        (ConversationId, SenderId, Content, MessageType, SentAt, IsEdited)
+        OUTPUT INSERTED.*
+        VALUES (@conversationId, @senderId, @content, 'text', GETUTCDATE(), 0)
+    `;
+
+    const result: Message[] = await createAndReturn<Message>(query, 
+        { conversationId, senderId, content }
+    );
+
+    return result?.[0] ?? null;
 }

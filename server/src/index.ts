@@ -40,7 +40,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendMessage', (message) => {
-    io.to(message.conversationId).emit('receiveMessage', message);
+
+    if(message.conversationId)
+      console.log('if met')
+      io.to(message.ConversationId).emit('receiveMessage', message);
   });
 
   socket.on('disconnect', () => {
@@ -48,7 +51,7 @@ io.on('connection', (socket) => {
   });
 });
 const startServer = async () => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
     })
 }

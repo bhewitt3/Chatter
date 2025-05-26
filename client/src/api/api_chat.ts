@@ -25,7 +25,8 @@ export const getConversationMessages = async (conversationId: number): Promise<A
         const response = await fetch('/api/chat/messages', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({conversationId: conversationId})
+            body: JSON.stringify({conversationId: conversationId}),
+            credentials: 'include'
         });
 
         const data: ApiResponse<Message[]> = await response.json();
@@ -35,6 +36,30 @@ export const getConversationMessages = async (conversationId: number): Promise<A
         return {
             type: 'error',
             message: 'Failed to fetch conversations.'
+        }
+    }
+};
+
+export const saveMessage = async (conversationId: number, senderId: number, content: string): Promise<ApiResponse<Message>> => {
+    try {
+        const response = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                conversationId: conversationId,
+                senderId: senderId,
+                content: content
+            }),
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+        return data;
+    } catch(err) {
+        console.error(err);
+        return {
+            type: 'error',
+            message: 'Failed to save message'
         }
     }
 }

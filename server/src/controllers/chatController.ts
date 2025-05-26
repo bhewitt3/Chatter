@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import { createConversationWithInitialMessage, getConversationsByUser, getMessagesByConversationId } from '../repositories/chatRepository';
+import { createConversationWithInitialMessage, createMessage, getConversationsByUser, getMessagesByConversationId } from '../repositories/chatRepository';
 import { User } from '../models/user/user.types';
 import { getUserByDisplayName } from '../repositories/userRepository';
 import { AuthenticatedRequest } from '../middleware/auth';
@@ -50,7 +50,35 @@ export const messagesByConversationId = async (req: AuthenticatedRequest, res: R
 
     res.status(200).json({
         type: 'success',
-        mssage: `Messages for conversationId ${conversationId}.`,
+        message: `Messages for conversationId ${conversationId}.`,
         data: messages
     });
 };
+
+export const saveMessage = async (req: AuthenticatedRequest, res: Response) => {
+    const {conversationId, senderId, content} = req.body;
+
+    try{
+        const message: Message | null = await createMessage(conversationId, senderId, content);
+        if(message){
+            res.status(200).json({
+                type: 'success',
+                message: "Message saved",
+                data: message
+            });
+            return;
+        }
+        res.status(500).json({
+            type: 'error',
+            message: 'An error occurred'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            type: 'error',
+            message: 'An error occurred.'
+        })
+    }
+
+    
+}

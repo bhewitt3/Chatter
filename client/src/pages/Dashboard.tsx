@@ -16,7 +16,6 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchConversations = async() => {
       const data: ApiResponse<ConversationPreview[]> | undefined = await getConversations();
-      console.log(data);
       if (data && data.data) {
         setConversationPreviews(data.data);
       }

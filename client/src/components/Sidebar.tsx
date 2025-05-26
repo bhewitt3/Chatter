@@ -15,14 +15,11 @@ type SidebarProps = {
 const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
-  console.log(user)
-
 
   const handleLogout = async() => {
     await logout();
     navigate('/');
   }
-  console.log(conversations);
 
  return (
     <div className="sidebar-container bg-secondary" >

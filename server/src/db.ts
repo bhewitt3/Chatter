@@ -69,6 +69,24 @@ export const create = async (queryText: string, params?: Record<string, any>): P
     }  
 };
 
+export const createAndReturn = async <T>(queryText: string, params?: Record<string, any>): Promise<T[]> => {
+    try{
+        const pool: sql.ConnectionPool = await poolPromise;
+        const request: sql.Request = pool.request();
+
+        if (params) {
+            for (const key in params) {
+                request.input(key, params[key]);
+            }
+        }
+        const result: sql.IResult<any> = await request.query(queryText);
+        return result.recordset;
+    } catch(err){
+        console.error('Query failed:', err);
+        throw err;
+    }
+};
+
 export const update = async (queryText: string, params?: Record<string, any>): Promise<number> => {
     try {
       const pool: sql.ConnectionPool = await poolPromise;
