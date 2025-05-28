@@ -7,7 +7,16 @@ export interface ConversationPreview {
     LastMessageAt: Date,
     WithUserId: number,
     WithUserDisplay: string,
-    WithUserAvatar: string
+    WithUserAvatar: string,
+    ReadAt: Date | null,
+    SenderId: number
+}
+export interface ConversationUpdatePayload {
+    Id: number,
+    LastMessage: string,
+    LastMessageAt: Date,
+    SenderId: number,
+    ReadAt: Date
 }
 
 export interface ConversationMessages {
@@ -30,5 +39,6 @@ export interface Message {
     Content: string,
     MessageType: string | null,
     SentAt: Date,
-    isEdited: boolean
+    isEdited: boolean,
+    ReadAt: Date
 }

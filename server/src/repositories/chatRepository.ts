@@ -1,4 +1,4 @@
-import {select, create, createAndReturn} from '../db'
+import {select, create, createAndReturn, update} from '../db'
 import type { ConversationPreview } from '../models/conversation/conversation.types'
 import type { Message } from '../models/message/message.types';
 export const createConversationWithInitialMessage = async (
@@ -42,11 +42,13 @@ export const getConversationsByUser = async(userId: number): Promise<Conversatio
             m.SentAt AS LastMessageAt,
             u.DisplayName AS WithUserDisplay,
             u.Id AS WithUserId,
-            u.ProfileImageUrl AS WithUserAvatar
+            u.ProfileImageUrl AS WithUserAvatar,
+            m.ReadAt AS ReadAt,
+            m.SenderId AS SenderId
         FROM Conversations c
         JOIN ConversationParticipants cp ON c.Id = cp.ConversationId
         OUTER APPLY (
-            SELECT TOP 1 m.Content, m.SentAt
+            SELECT TOP 1 m.Content, m.SentAt, m.ReadAt, m.SenderId
             FROM Messages m
             WHERE m.ConversationId = c.Id
             ORDER BY m.SentAt DESC
@@ -90,4 +92,29 @@ export const createMessage = async(conversationId: number, senderId: number, con
     );
 
     return result?.[0] ?? null;
+};
+
+export const getParticipantIdsByConversationId = async (conversationId: number): Promise<number[] | null> => {
+    const query: string = `
+        SELECT UserId
+        FROM ConversationParticipants
+        WHERE ConversationId = @conversationId
+    `;
+
+    const rows: { UserId: number }[] = await select(query, { conversationId });
+    const ids: number[] = rows.map(row => row.UserId);
+
+    return ids.length > 0 ? ids : null;
+};
+
+export const readMessage = async (messageId: number): Promise<boolean> => {
+    const query: string = `
+        UPDATE Messages
+        SET ReadAt = GETUTCDATE()
+        WHERE Id = @messageId AND ReadAt IS NULL
+    `;
+
+    const rowsAffected: number = await update(query, {messageId});
+
+    return rowsAffected > 0;
 }

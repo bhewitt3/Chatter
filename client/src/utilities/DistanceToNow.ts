@@ -2,7 +2,7 @@
 export function shortenDistance(distance: string) {
   return distance
     .replace("about ", "")
-    .replace("less than a minute", "just now")
+    .replace("less than a minute ago", "just now")
     .replace(" minutes", "m")
     .replace(" minute", "m")
     .replace(" hours", "h")
@@ -13,5 +13,5 @@ export function shortenDistance(distance: string) {
     .replace(" month", "mo")
     .replace(" years", "y")
     .replace(" year", "y")
-    .replace(" ago", " ago");
+    
 }

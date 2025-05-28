@@ -8,7 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import { Button, Form } from 'react-bootstrap';
 import type { ApiResponse } from '../types/api';
-import { io, Socket } from 'socket.io-client';
+import EmptyChatWindow from './EmptyChatWindow';
+import { getSocket } from '../utilities/socket';
 
 type ChatWindowProps = {
   conversationId: number | null;
@@ -22,14 +23,22 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const socket = useRef(getSocket());
+
 
   // Fetch messages and withUser info when conversationId changes
   useEffect(() => {
     const fetchMessages = async () => {
       if (conversationId == null) return;
       const fetchedMessages = await getConversationMessages(conversationId);
-      if (fetchedMessages.data) setMessages(fetchedMessages.data);
+      if (fetchedMessages.data) {
+        setMessages(fetchedMessages.data);
+        fetchedMessages.data.forEach((message: Message) => {
+          if (message.SenderId !== user?.Id && !message.ReadAt){
+            socket.current.emit('readMessage', message);
+          }
+        });
+      }
     };
 
     const fetchWithUser = async () => {
@@ -49,27 +58,31 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
 
   // Setup and manage socket connection for current conversation
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !socket) return;
 
-    const socket = io('http://localhost:5000', {
-      path: '/socket.io',
-      withCredentials: true,
-    });
-
-    socketRef.current = socket;
-    socket.on('connect', () => {
-      console.log("socket connected:", socket.id);
-      socket.emit('joinConversation', { conversationId });
-    });
-
-    socket.on('receiveMessage', (incomingMessage: Message) => {
-      setMessages((prevMessages) => [incomingMessage, ...prevMessages]);
-    });
-
-    return () => {
-      socket.off('receiveMessage');
-      socket.disconnect();
+    const handleReceiveMessage = (incomingMessage: Message) => {
+      if (incomingMessage.ConversationId === conversationId) {
+        setMessages((prevMessages) => [incomingMessage, ...prevMessages ]);
+        if (incomingMessage.SenderId !== user?.Id){
+          socket.current.emit('readMessage', incomingMessage);
+        }
+      }
     };
+
+    const handleMessageRead = (messageId: number) => {
+      setMessages((prevMessages) => 
+        prevMessages.map((msg) =>
+          msg.Id === messageId ? {...msg, ReadAt: new Date()} : msg)
+      );
+    };
+
+    socket.current.on('receiveMessage', handleReceiveMessage);
+    socket.current.on('messageRead', handleMessageRead);
+    return () => {
+      socket.current.off('receiveMessage', handleReceiveMessage);
+      socket.current.off('messageRead', handleMessageRead);
+    }
+    
   }, [conversationId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -79,8 +92,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
         const response: ApiResponse<Message> = await saveMessage(conversationId, user.Id, newMessage);
         if (response.type === 'success' && response.data) {
           setNewMessage('');
-          socketRef.current?.emit('sendMessage', response.data);
-
+          socket.current.emit('sendMessage', response.data);
         }
       }
     } catch (err) {
@@ -91,6 +103,10 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
     navigate('/login');
     return null;
   }
+
+  const lastUserMessage = [...messages]
+    .filter((msg) => msg.SenderId === user.Id && msg.ReadAt !== null)
+    .sort((a, b) => new Date(b.SentAt).getTime() - new Date(a.SentAt).getTime())[0];
 
   return (
     <div className="chat-container">
@@ -103,21 +119,39 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
 
           <div className="messages-container">
             <div ref={bottomRef} />
-            {messages.map((message) => (
-              message.SenderId === user.Id ? (
-                <div className="message-line my-message-line" key={message.Id}>
-                  <div className="message-container my-message-container">
-                    <p className="message">{message.Content}</p>
+            {messages.map((message) => {
+              const isMyMessage = message.SenderId === user.Id;
+              const isLastMyMessage = message.Id === lastUserMessage?.Id;
+              const isRead = message.ReadAt != null;
+
+              return isMyMessage ? (
+                <div className='message-line-wrapper' key={message.Id}>
+                  <div className="message-line my-message-line">
+                    <div className="message-container my-message-container bg-primary text-light">
+                      <p className="message">{message.Content}</p>
+                    </div>
                   </div>
+                  {isLastMyMessage && isRead && (
+                    <p className="read-receipt">
+                      read{' '}
+                      {new Date(message.ReadAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </p>
+                  )}
                 </div>
               ) : (
-                <div className="message-line with-message-line" key={message.Id}>
-                  <div className="message-container with-message-container bg-light">
-                    <p className="message">{message.Content}</p>
+                <div className='message-line-wrapper' key={message.Id}>
+                  <div className="message-line with-message-line" key={message.Id}>
+                    <div className="message-container with-message-container bg-light">
+                      <p className="message">{message.Content}</p>
+                    </div>
                   </div>
                 </div>
-              )
-            ))}
+              );
+            })}
           </div>
 
           <div className="message-form-container bg-secondary ">
@@ -137,7 +171,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
           </div>
         </>
       ) : (
-        <div>No messages</div>
+        <EmptyChatWindow />
       )}
     </div>
   );

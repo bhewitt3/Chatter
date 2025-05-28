@@ -62,4 +62,4 @@ export const saveMessage = async (conversationId: number, senderId: number, cont
             message: 'Failed to save message'
         }
     }
-}
+};

@@ -5,5 +5,6 @@ export interface Message {
     Content: string,
     MessageType: string | null,
     SentAt: Date,
-    isEdited: boolean
+    isEdited: boolean,
+    ReadAt: Date
 }

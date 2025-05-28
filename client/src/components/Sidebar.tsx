@@ -12,7 +12,7 @@ type SidebarProps = {
 }
 
 
-const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
+const Sidebar = ({ conversations, onSelectConversation }: SidebarProps) => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
 
@@ -20,7 +20,7 @@ const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
     await logout();
     navigate('/');
   }
-
+  console.log(conversations);
  return (
     <div className="sidebar-container bg-secondary" >
       <div className="bg-secondary-dark text-light text-center">
@@ -51,13 +51,17 @@ const Sidebar = ({conversations, onSelectConversation}: SidebarProps) => {
               <div className="flex-grow-1">
                 <div className="d-flex justify-content-between name-container">
                   <p className="text-truncate text-light  mb-0 fs-5">{conv.WithUserDisplay}</p>
-                  <small className="text-light">
-                    {shortenDistance(
-                      formatDistanceToNow(new Date(conv.LastMessageAt), {
-                        addSuffix: true,
-                      })
-                    )}
-                  </small>
+                  <div className="d-flex">
+                    <small className="text-light">
+                      {shortenDistance(
+                        formatDistanceToNow(new Date(conv.LastMessageAt), {
+                          addSuffix: true,
+                        })
+                      )}
+                    </small>
+                    {conv.ReadAt == null && conv.SenderId !== user?.Id && <div className="unread-icon"></div>}
+                  </div>
+                 
                 </div>
                 <div
                   className="text-truncate message-preview"

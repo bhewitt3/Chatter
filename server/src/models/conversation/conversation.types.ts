@@ -13,5 +13,7 @@ export interface ConversationPreview {
     LastMessage: string,
     LastMessageAt: Date,
     WithUser: string,
-    WithUserAvatar: string
+    WithUserAvatar: string,
+    ReadAt: Date | null,
+    SenderId: number
 }
