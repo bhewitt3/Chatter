@@ -16,7 +16,15 @@
 .custom-list-item:hover {
     background-color: #2f2f33 !important;
 }
-
+.custom-list-item-active{
+    background-color: #6b488e !important;
+}
+.custom-list-item-active:hover{
+    background-color: #58367a !important;
+}
+.contact-search::placeholder {
+    color: #d6dbee !important;
+}
 .profile-tab {
     position: fixed;
     bottom: 0;
@@ -24,7 +32,9 @@
     padding: 10px;
     height: 70px;
 }
-
+.name-text {
+    max-width: 160px;
+}
 .logout{
     margin-top: 0.6rem;
     margin-right: 0.5rem;
@@ -37,13 +47,17 @@
     background-color: #202022;
 }
 .message-preview {
-    color: #a2a2aa !important;
+    color: #a2a2aa;
 }
 .unread-icon{
     width: 10px;
     height: 10px;
-    background-color: rgb(0, 119, 255);
+    background-color: #a256ee;
     border-radius: 10px;
     margin-top: 7px;
     margin: 7px 0px 0px 10px;
+}
+.search-new-message{
+    height: 50px;
+    padding: 7px;
 }

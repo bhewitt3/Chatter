@@ -15,10 +15,10 @@ const SignUp = () => {
     username: "",
     displayName: "",
     email: "",
-    password: ""
+    password: "",
+    avatar: null
   }
   const [inputCredentials, setInputCredentials] = useState(initialCredentials);
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -95,7 +95,7 @@ const SignUp = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-5" controlId="password">
+        <Form.Group className="mb-2" controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -105,7 +105,18 @@ const SignUp = () => {
             required
           />
         </Form.Group>
-
+        <Form.Group className="mb-4" controlId="avatar">
+        <Form.Label>Avatar</Form.Label>
+        <Form.Control
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files ? target.files[0] : null;
+            setInputCredentials({ ...inputCredentials, avatar: file });
+          }}
+        />
+        </Form.Group>
         
         {!loading ? (
           <Button className="w-100" variant="primary" type="submit">

@@ -24,10 +24,20 @@ export const login = async (credentials: LoginCredentials): Promise<ApiResponse<
 
 export const signUp = async (credentials: SignUpCredentials): Promise<ApiResponse<User>> => {
     try{
+
+        const formData = new FormData();
+
+        formData.append("username", credentials.username);
+        formData.append("displayName", credentials.displayName);
+        formData.append("email", credentials.email);
+        formData.append("password", credentials.password);
+
+        if (credentials.avatar){
+            formData.append("avatar", credentials.avatar);
+        }
         const response = await fetch('/api/auth/register', {
             method: 'POST',
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(credentials),
+            body: formData,
             credentials: 'include'
         });
 
@@ -54,6 +64,25 @@ export const userById = async(userId: number): Promise<ApiResponse<User>> => {
         return {
             type: 'error',
             message: `An error occurred fetching user by id: ${err}`
+        }
+    }
+};
+
+export const usersByDisplayName = async(query: string): Promise<ApiResponse<User[]>> => {
+    try{
+        const response = await fetch('/api/auth/searchDisplayNames', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify({query: query})
+        });
+
+        const data: ApiResponse<User[]> = await response.json();
+        return data
+    } catch (err) {
+        return {
+            type: 'error',
+            message: 'An error occurred fetching users'
         }
     }
 };

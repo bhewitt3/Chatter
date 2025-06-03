@@ -11,13 +11,19 @@
 
 /* Top user bar */
 .top-bar {
-  height: 70px;
+  height: 60px;
   display: flex;
   align-items: center;
   gap: 15px;
-  padding-left: 15px;
+  padding: 0px 15px;
   flex-shrink: 0;
   color: white;
+}
+.close{
+  font-size: 35px;
+}
+.close:hover{
+  cursor: pointer;
 }
 
 /* Scrollable message area */
@@ -46,7 +52,7 @@
   display: inline-block;
   padding: 8px 12px;
   border-radius: 10px;
-  max-width: 75%;
+  max-width: 45%;
   word-wrap: break-word;
 }
 .my-message-container {
@@ -66,19 +72,22 @@
   position: sticky;
   bottom: 0;
   width: 100%;
-  padding: 12px 16px;
-  height: 70px;
+  
   z-index: 10;
   display: flex;
   align-items: center;
 }
 .input-form {
     flex: 1;
+    margin: 12px;
 }
 /* send button */
 .send-message {
-    padding:  0px 10px;
+    padding:  3px 15px 0px 15px;
     font-size: 30px;
+}
+.send-button {
+  padding: 0;
 }
 /* Message text */
 .message {

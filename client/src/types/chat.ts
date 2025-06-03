@@ -42,3 +42,7 @@ export interface Message {
     isEdited: boolean,
     ReadAt: Date
 }
+export interface InitialMessageInput {
+    recipientDisplayName: string,
+    message: string
+}

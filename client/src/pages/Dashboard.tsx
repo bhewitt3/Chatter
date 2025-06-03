@@ -91,14 +91,42 @@ const Dashboard = () => {
       );
     }
   };
+
+  const handleCloseConversation = () => {
+    setActiveConversation(null);
+    activeConversationRef.current = null;
+    setWithUserId(null);
+  };
+
+  const openNewConversation = (newConv: ConversationPreview, withUser: number) => {
+    setConversationPreviews((prev) => {
+      const exists = prev.some((c) => c.Id === newConv.Id);
+      if(!exists){
+        socket.current.emit("joinConversations", [newConv.Id]);
+        return [newConv, ...prev];
+      }
+      return prev;
+    });
+    setActiveConversation(newConv.Id);
+    activeConversationRef.current = newConv.Id;
+    setWithUserId(withUser);
+
+    socket.current.emit("newConversation", newConv);
+  }
   
   return (
     <div className="flex">
       <Sidebar 
         conversations={conversationPreviews}
         onSelectConversation={onSelectConversation}
+        activeConversationId={activeConversation}
        />
-      <ChatWindow conversationId={activeConversation} withUserId={withUserId}/>
+      <ChatWindow 
+        conversationId={activeConversation}
+        withUserId={withUserId}
+        onClose={handleCloseConversation}
+        onCreateConversation={openNewConversation}
+      />
     </div>
   )
 }

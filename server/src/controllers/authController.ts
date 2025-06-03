@@ -3,9 +3,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { UserLoginResponseDTO } from '../models/user/user.dto';
-import { getUserByUsername, createUser, getUserByEmailOrUsername, getUserById } from '../repositories/userRepository';
+import { getUserByUsername, createUser, getUserByEmailOrUsername, getUserById, searchByDisplayName } from '../repositories/userRepository';
 import type { JwtPayload } from '../types';
 import { User } from '../models/user/user.types';
+import { uploadAvatar } from '../helpers/imageUpload';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -13,11 +15,14 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 export const registerUser = async (req: Request, res: Response) => {
     const {username, displayName, email, password} = req.body;
 
+    const avatarFile = req.file;
+
     if(!username || !email || !password){
         res.status(400).json({ 
             type: 'error',
             message: "username, email, and password are required."
         });
+        return;
     }
 
     try{
@@ -31,8 +36,13 @@ export const registerUser = async (req: Request, res: Response) => {
             return;
         }
 
+        let profileImageUrl = null;
+        if(avatarFile){
+            profileImageUrl = await uploadAvatar(avatarFile.buffer);
+        }
+
         const passwordHash = await bcrypt.hash(password, 10);
-        const createSuccess = await createUser(username, displayName, email, passwordHash);
+        const createSuccess = await createUser(username, displayName, email, passwordHash, profileImageUrl);
 
         if(createSuccess){
             res.status(201).json({
@@ -192,3 +202,29 @@ export const userById = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const searchDisplayNames = async (req: AuthenticatedRequest, res: Response) => {
+    const {query} = req.body;
+    try{
+        console.log("hot")
+        const users: User[] = await searchByDisplayName(query);
+        if (users.length === 0){
+            res.status(200).json({
+                type: 'success',
+                message: 'No results'
+            });
+            return;
+        }
+        console.log(users);
+        res.status(200).json({
+            type: 'success',
+            message: 'Display name search results',
+            data: users
+        });
+    } catch (err) {
+        res.status(500).json({
+            type: 'error',
+            message: 'Internal server error'
+        });
+    }
+}

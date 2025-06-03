@@ -1,38 +1,61 @@
-import {select, create, createAndReturn, update} from '../db'
+import {select, create, createAndReturn, update} from '../helpers/db'
 import type { ConversationPreview } from '../models/conversation/conversation.types'
-import type { Message } from '../models/message/message.types';
+import type { Message } from '../models/message/message.types.ts';
+
+
 export const createConversationWithInitialMessage = async (
-    senderId: number,
-    recipientId: number,
-    message: string
-): Promise<boolean> => {
-    const query: string = `
-        DECLARE @ConversationId INT;
+  senderId: number,
+  recipientId: number,
+  message: string
+): Promise<ConversationPreview | null> => {
+  const query = `
+    DECLARE @ConversationId INT;
 
-        -- Step 1: Create conversation
-        INSERT INTO Conversations (Name, IsGroup, CreatedBy)
-        VALUES (NULL, 0, @senderId);
+    -- Step 1: Create conversation
+    INSERT INTO Conversations (Name, IsGroup, CreatedBy)
+    VALUES (NULL, 0, @senderId);
 
-        SET @ConversationId = SCOPE_IDENTITY();
+    SET @ConversationId = SCOPE_IDENTITY();
 
-        -- Step 2: Add both participants
-        INSERT INTO ConversationParticipants (ConversationId, UserId)
-        VALUES 
-            (@ConversationId, @senderId),
-            (@ConversationId, @recipientId);
+    -- Step 2: Add both participants
+    INSERT INTO ConversationParticipants (ConversationId, UserId)
+    VALUES 
+        (@ConversationId, @senderId),
+        (@ConversationId, @recipientId);
 
-        -- Step 3: Add initial message
-        INSERT INTO Messages (ConversationId, SenderId, Content)
-        VALUES (@ConversationId, @senderId, @message);
+    -- Step 3: Add initial message
+    INSERT INTO Messages (ConversationId, SenderId, Content)
+    VALUES (@ConversationId, @senderId, @message);
+
+    -- Step 4: Select the conversation preview to return
+
+    SELECT TOP 1
+        c.Id,
+        c.Name,
+        c.IsGroup,
+        c.CreatedBy,
+        m.Content AS LastMessage,
+        m.SentAt AS LastMessageAt,
+        u.Id AS WithUserId,
+        u.DisplayName AS WithUserDisplay,
+        u.ProfileImageUrl AS WithUserAvatar,
+        m.ReadAt,
+        m.SenderId
+    FROM Conversations c
+    INNER JOIN Messages m ON m.ConversationId = c.Id
+    INNER JOIN ConversationParticipants cp ON cp.ConversationId = c.Id AND cp.UserId = @senderId
+    INNER JOIN Users u ON u.Id = @recipientId
+    WHERE c.Id = @ConversationId
+    ORDER BY m.SentAt DESC;
     `;
 
-    const rowsAffected: number = await create(query, {
-        senderId,
-        recipientId,
-        message
+    const results = await createAndReturn<ConversationPreview>(query, {
+    senderId,
+    recipientId,
+    message,
     });
 
-    return rowsAffected > 0;
+    return results[0]; // return single ConversationPreview
 };
 
 export const getConversationsByUser = async(userId: number): Promise<ConversationPreview[]> => {

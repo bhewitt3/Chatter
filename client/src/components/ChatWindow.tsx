@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Message } from '../types/chat';
+import type { ConversationPreview, Message } from '../types/chat';
 import { getConversationMessages, saveMessage } from '../api/api_chat';
 import type { User } from '../types/user';
 import { userById } from '../api/api_user';
@@ -14,9 +14,11 @@ import { getSocket } from '../utilities/socket';
 type ChatWindowProps = {
   conversationId: number | null;
   withUserId: number | null;
+  onClose: () => void;
+  onCreateConversation: (newConv: ConversationPreview, withUserId: number) => void;
 };
 
-const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
+const ChatWindow = ({ conversationId, withUserId, onClose, onCreateConversation }: ChatWindowProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [withUser, setWithUser] = useState<User | null>(null);
@@ -99,6 +101,13 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
       console.error('Failed to save message.');
     }
   };
+
+  const handleCloseChat = () => {
+    setMessages([]);
+    setWithUser(null);
+    onClose();
+  }
+
   if (!user) {
     navigate('/login');
     return null;
@@ -112,11 +121,32 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
     <div className="chat-container">
       {messages && withUser ? (
         <>
-          <div className="top-bar bg-secondary">
-            <img src="/src/assets/user.png" height={40} />
-            <h3>{withUser.DisplayName}</h3>
+        {/* Top chat window bar */}
+          <div className="top-bar bg-secondary d-flex justify-content-between ">
+            <div className='d-flex gap-2'>
+              <img 
+              src={withUser.ProfileImageUrl ? withUser.ProfileImageUrl :"/src/assets/user.png"}
+              height={40}
+              className='rounded-circle'/>
+              <h3>{withUser.DisplayName}</h3>
+            </div>
+            <div className='d-flex gap-4'>
+              <Button>
+                <span className="material-symbols-outlined pt-1">
+                  call
+                </span>
+              </Button>
+              <Button>
+                <span className="material-symbols-outlined pt-1">
+                  videocam
+                </span>
+              </Button>
+              <span className="material-symbols-outlined close pt-1" onClick={handleCloseChat}>
+                close
+              </span>
+            </div>
           </div>
-
+          {/* Main messages window */}
           <div className="messages-container">
             <div ref={bottomRef} />
             {messages.map((message) => {
@@ -153,7 +183,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
               );
             })}
           </div>
-
+          {/* Bottom bar */}
           <div className="message-form-container bg-secondary ">
             <Form className="input-form d-flex" onSubmit={handleSubmit}>
               <Form.Control
@@ -163,7 +193,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
                 onChange={(e) => setNewMessage(e.target.value)}
                 required
               />
-              <Button type="submit" className="ms-2">
+              <Button type="submit" className="ms-2 send-button">
                 <span className="material-symbols-outlined text-light send-message">send</span>
               </Button>
             </Form>
@@ -171,7 +201,7 @@ const ChatWindow = ({ conversationId, withUserId }: ChatWindowProps) => {
           </div>
         </>
       ) : (
-        <EmptyChatWindow />
+        <EmptyChatWindow onCreateConversation={onCreateConversation}/>
       )}
     </div>
   );

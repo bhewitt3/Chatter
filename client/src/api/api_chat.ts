@@ -63,3 +63,27 @@ export const saveMessage = async (conversationId: number, senderId: number, cont
         }
     }
 };
+
+export const startConversation = async (userId: number, recipientDisplay: string, message: string): Promise<ApiResponse<ConversationPreview>> => {
+    try{
+        const response = await fetch('/api/chat/new', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify({
+                userId: userId,
+                recipientDisplayName: recipientDisplay,
+                message: message
+            })
+        });
+
+        const data: ApiResponse<ConversationPreview> = await response.json();
+        return data;
+    } catch (err) {
+        console.error(err);
+        return {
+            type: 'error',
+            message: 'Failed to create new conversation'
+        }
+    }
+}

@@ -7,7 +7,8 @@ export interface SignUpCredentials {
     username: string,
     displayName: string,
     email: string,
-    password: string
+    password: string,
+    avatar?: File | null;
 }
 
 export interface User {

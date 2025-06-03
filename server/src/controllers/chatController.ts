@@ -18,19 +18,17 @@ export const startConversation = async (req: AuthenticatedRequest, res: Response
         });
         return;
     }
-    const createSuccess = await createConversationWithInitialMessage(userId, recipient.Id, message);
-
-    if(createSuccess){
+    const chatPreview: ConversationPreview | null = await createConversationWithInitialMessage(userId, recipient.Id, message);
         res.status(200).json({
             type: 'success',
-            message: 'Conversation started.'
+            message: 'Conversation started.',
+            data: chatPreview
         });
         return;
-    }
-    res.status(500).json({
-        type: 'error',
-        message: 'An error occurred creating the conversation.'
-    })
+    // res.status(500).json({
+    //     type: 'error',
+    //     message: 'An error occurred creating the conversation.'
+    // })
 };
 
 export const conversationsByUser = async(req: AuthenticatedRequest, res: Response) => {
