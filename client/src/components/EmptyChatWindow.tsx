@@ -66,7 +66,7 @@ const EmptyChatWindow = ({ onCreateConversation }: Props) => {
   }
 
   return (
-    <div className="text-center mt-5 w-50 mx-auto">
+    <div className="text-center text-light mt-5 w-50 mx-auto">
       <h2>Start a Conversation</h2>
       <Form 
       className="w-50 mx-auto position-relative"

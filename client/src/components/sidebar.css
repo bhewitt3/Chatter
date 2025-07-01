@@ -5,6 +5,26 @@
     position: fixed;
     top: 0;
     left: 0;
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+}
+@media (max-width: 768px) {
+  .sidebar-container {
+    transform: translateX(-100%);
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0);
+    background-color: #343a40;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  }
+}
+
+.toggle-sidebar {
+  position: fixed;
+  top: 4rem;
+  left: 1rem;
+  z-index: 999;
 }
 
 .custom-list-item {

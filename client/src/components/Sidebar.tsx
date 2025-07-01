@@ -18,15 +18,29 @@ type SidebarProps = {
 const Sidebar = ({ conversations, onSelectConversation, activeConversationId }: SidebarProps) => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  const handleConvClick = async (convId: number, withUserId: number) => {
+    onSelectConversation(convId, withUserId);
+    if (window.innerWidth < 768) setIsOpen(false);
+  }
+
  return (
-    <div className="sidebar-container bg-secondary" >
+  <>
+    <button
+      className=" btn btn-primary m-2 toggle-sidebar"
+      onClick={() => setIsOpen(!isOpen)}
+    >
+      ☰ Chats
+    </button>
+
+    <div className={`sidebar-container bg-secondary ${isOpen ? 'open' : ''}`}>
       <div className="bg-secondary-dark text-light text-center">
         <div className="d-flex align-items-center justify-content-center gap-2">
           <img
@@ -69,7 +83,7 @@ const Sidebar = ({ conversations, onSelectConversation, activeConversationId }: 
               ${activeConversationId !== null && conv.Id === activeConversationId ? 'custom-list-item-active' : ''} 
               ${unread ? 'fw-medium' : ''}
             `}
-            onClick={() => onSelectConversation(conv.Id, conv.WithUserId)}
+            onClick={() => handleConvClick(conv.Id, conv.WithUserId)}
           >
             <div className="d-flex align-items-start gap-2">
               {/* Avatar container */}
@@ -117,8 +131,8 @@ const Sidebar = ({ conversations, onSelectConversation, activeConversationId }: 
         </div> 
         <span className="material-symbols-outlined logout" onClick={handleLogout}>logout</span>
       </div>
-      
     </div>
+    </>
   );
 };
 
